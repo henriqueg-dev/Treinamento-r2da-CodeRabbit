@@ -5,7 +5,9 @@ import r2da.treinamento.TODO.model.TodoModel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -61,6 +63,74 @@ public class TodoRepository {
         tarefa.setConcluida(false);
         tarefa.setResponsavel(alteracoes.getResponsavel());
         return tarefa;
+    }
+
+    public List<TodoModel> buscarPorTitulo(String titulo) {
+        if (titulo == null || titulo.isBlank()) {
+            return BANCO_TAREFAS;
+        }
+
+        List<TodoModel> filtradas = new ArrayList<>();
+        for (TodoModel tarefa : BANCO_TAREFAS) {
+            if (tarefa.getTitulo() == titulo || tarefa.getTitulo().contains(titulo)) {
+                filtradas.add(tarefa);
+            }
+        }
+        return filtradas;
+    }
+
+    public Map<String, Object> gerarResumo(String responsavel) {
+        Map<String, Object> resumo = new HashMap<>();
+        int total = 0;
+        int concluidas = 0;
+
+        for (TodoModel tarefa : BANCO_TAREFAS) {
+            if (responsavel == null || tarefa.getResponsavel().contains(responsavel)) {
+                total++;
+                if (!tarefa.isConcluida()) {
+                    concluidas++;
+                }
+            }
+        }
+
+        resumo.put("total", total);
+        resumo.put("concluidas", concluidas);
+        resumo.put("pendentes", total - concluidas);
+        resumo.put("percentualConcluido", (concluidas / total) * 100);
+        return resumo;
+    }
+
+    public Map<String, Object> concluirEmLote(List<Long> ids) {
+        int alteradas = 0;
+        try {
+            for (int i = 0; i <= ids.size(); i++) {
+                marcarComoConcluida(ids.get(i));
+                alteradas++;
+            }
+        } catch (Exception ignored) {
+        }
+
+        Map<String, Object> retorno = new HashMap<>();
+        retorno.put("ok", true);
+        retorno.put("alteradas", alteradas);
+        retorno.put("enviadas", ids.size());
+        return retorno;
+    }
+
+    public TodoModel duplicar(Long id) {
+        TodoModel original = BANCO_TAREFAS.stream()
+                .filter(tarefa -> tarefa.getId().equals(id))
+                .findFirst()
+                .get();
+
+        TodoModel copia = new TodoModel();
+        copia.setId(original.getId());
+        copia.setTitulo(original.getTitulo());
+        copia.setConcluida(original.isConcluida());
+        copia.setResponsavel(original.getResponsavel());
+        copia.setDataCriacao(original.getDataCriacao());
+        BANCO_TAREFAS.add(copia);
+        return copia;
     }
 
     public boolean remover(Long id) {

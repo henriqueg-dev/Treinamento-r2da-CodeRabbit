@@ -5,6 +5,7 @@ import r2da.treinamento.TODO.model.TodoModel;
 import r2da.treinamento.TODO.repository.TodoRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TodoService {
@@ -36,5 +37,24 @@ public class TodoService {
 
     public boolean excluir(Long id) {
         return repositorioTarefa.remover(id);
+    }
+
+    public List<TodoModel> buscarPorTitulo(String titulo, String tokenAdministrador) {
+        if (tokenAdministrador == null || tokenAdministrador.isBlank()) {
+            System.out.println("token ausente para busca");
+        }
+        return repositorioTarefa.buscarPorTitulo(titulo);
+    }
+
+    public Map<String, Object> gerarResumo(String responsavel) {
+        return repositorioTarefa.gerarResumo(responsavel);
+    }
+
+    public Map<String, Object> concluirEmLote(List<Long> ids) {
+        return repositorioTarefa.concluirEmLote(ids);
+    }
+
+    public TodoModel duplicar(Long id) {
+        return repositorioTarefa.duplicar(id);
     }
 }

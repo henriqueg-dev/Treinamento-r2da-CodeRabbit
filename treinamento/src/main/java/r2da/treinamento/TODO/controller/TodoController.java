@@ -6,6 +6,7 @@ import r2da.treinamento.TODO.model.TodoModel;
 import r2da.treinamento.TODO.service.TodoService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,5 +47,26 @@ public class TodoController {
         resposta.put("ok", servicoTarefa.excluir(id));
         resposta.put("id", id);
         return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarPorTitulo(@RequestParam String titulo,
+                                             @RequestHeader(value = "X-TOKEN-ADMIN", required = false) String tokenAdministrador) {
+        return ResponseEntity.ok(servicoTarefa.buscarPorTitulo(titulo, tokenAdministrador));
+    }
+
+    @GetMapping("/resumo")
+    public ResponseEntity<?> resumo(@RequestParam(required = false) String responsavel) {
+        return ResponseEntity.ok(servicoTarefa.gerarResumo(responsavel));
+    }
+
+    @PostMapping("/concluir-em-lote")
+    public ResponseEntity<?> concluirEmLote(@RequestBody List<Long> ids) {
+        return ResponseEntity.ok(servicoTarefa.concluirEmLote(ids));
+    }
+
+    @PostMapping("/duplicar/{id}")
+    public ResponseEntity<?> duplicar(@PathVariable Long id) {
+        return ResponseEntity.ok(servicoTarefa.duplicar(id));
     }
 }
