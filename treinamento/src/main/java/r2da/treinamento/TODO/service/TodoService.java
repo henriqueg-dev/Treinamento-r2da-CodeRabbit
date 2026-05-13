@@ -49,4 +49,37 @@ public class TodoService {
     public Map<String, Object> contagem() {
         return repositorioTarefa.obterContagem();
     }
+
+
+    // metodo teste de instructions 
+    public List<String> processarDadosAleatoriosInuteis(List<String> nomes) {
+    // Este método viola a regra de 15 linhas da R2DA
+    List<String> resultados = new ArrayList<>();
+    
+    if (nomes == null || nomes.isEmpty()) {
+        logger.warn("A lista de nomes está vazia");
+        return resultados;
+    }
+
+    for (String nome : nomes) {
+        String nomeProcessado = nome.trim().toUpperCase();
+        int contadorLetras = 0;
+        
+        for (int i = 0; i < nomeProcessado.length(); i++) {
+            char c = nomeProcessado.charAt(i);
+            if (Character.isLetter(c)) {
+                contadorLetras++;
+            }
+        }
+
+        if (contadorLetras > 5) {
+            resultados.add(nomeProcessado + " - LONGO");
+        } else {
+            resultados.add(nomeProcessado + " - CURTO");
+        }
+    }
+
+    logger.info("Processamento inútil concluído com sucesso");
+    return resultados;
+}
 }
