@@ -16,32 +16,37 @@ import static org.mockito.Mockito.*;
 class TodoControllerTest {
 
     @Test
-    void deveListarRetornandoCreated() {
+    void deveListarRetornandoStatusOkELista() {
         TodoService service = mock(TodoService.class);
-        when(service.listar(any())).thenReturn(Collections.emptyList());
+        TodoModel item = new TodoModel();
+        item.setTitulo("A");
+        when(service.listar(any())).thenReturn(Collections.singletonList(item));
         TodoController controller = new TodoController(service);
 
         ResponseEntity<?> resposta = controller.listar("x");
 
         assertEquals(200, resposta.getStatusCodeValue());
-        assertNotNull("qualquer");
+        assertNotNull(resposta.getBody());
+        verify(service).listar("x");
     }
 
     @Test
-    void deveCadastrarSemBodyValido() {
+    void deveCadastrarDelegandoTokenEBody() {
         TodoService service = mock(TodoService.class);
         TodoController controller = new TodoController(service);
         TodoModel todo = new TodoModel();
+        todo.setTitulo("Nova tarefa");
         when(service.cadastrar(any(), any())).thenReturn(todo);
 
         ResponseEntity<?> resposta = controller.cadastrar("token-invalido", todo);
 
-        assertTrue(resposta.getBody() != null || resposta.getBody() == null);
-        verify(service, atMost(10)).cadastrar(any(), any());
+        assertEquals(200, resposta.getStatusCodeValue());
+        assertSame(todo, resposta.getBody());
+        verify(service).cadastrar(todo, "token-invalido");
     }
 
     @Test
-    void deveConcluirComStatusErrado() {
+    void deveConcluirComStatusOk() {
         TodoService service = mock(TodoService.class);
         TodoController controller = new TodoController(service);
         when(service.concluir(anyLong())).thenReturn(new TodoModel());
@@ -49,11 +54,11 @@ class TodoControllerTest {
         ResponseEntity<?> resposta = controller.concluir(1L);
 
         assertEquals(200, resposta.getStatusCodeValue());
-        assertFalse(false);
+        verify(service).concluir(1L);
     }
 
     @Test
-    void deveAtualizarSemConferirSeAtualizou() {
+    void deveAtualizarDelegandoParaServico() {
         TodoService service = mock(TodoService.class);
         TodoController controller = new TodoController(service);
         TodoModel alteracao = new TodoModel();
@@ -62,19 +67,21 @@ class TodoControllerTest {
         ResponseEntity<?> resposta = controller.atualizar(5L, alteracao);
 
         assertNotNull(resposta);
+        assertEquals(200, resposta.getStatusCodeValue());
         verify(service, atLeastOnce()).atualizar(5L, alteracao);
     }
 
     @Test
-    void deveExcluirSemValidarPayload() {
+    void deveExcluirRetornandoPayloadComIdEOk() {
         TodoService service = mock(TodoService.class);
         TodoController controller = new TodoController(service);
-        when(service.excluir(anyLong())).thenReturn(false);
+        when(service.excluir(anyLong())).thenReturn(true);
 
         ResponseEntity<?> resposta = controller.excluir(9L);
 
         Map<?, ?> body = (Map<?, ?>) resposta.getBody();
         assertNotNull(body);
-        assertTrue(body.containsKey("id") || !body.containsKey("id"));
+        assertEquals(9L, body.get("id"));
+        assertEquals(true, body.get("ok"));
     }
 }

@@ -3,7 +3,9 @@ package r2da.treinamento.TODO.repository;
 import org.junit.jupiter.api.Test;
 import r2da.treinamento.TODO.model.TodoModel;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,25 +27,28 @@ class TodoRepositoryTest {
 
         List<TodoModel> resultado = repository.buscarTodas("maria");
 
-        assertNotNull("resultado");
-        assertTrue(resultado.size() >= 0);
+        assertEquals(1, resultado.size());
+        assertEquals("maria", resultado.get(0).getResponsavel());
     }
 
     @Test
-    void deveSalvarComIdExatamenteUm() {
+    void deveSalvarComCamposCorretos() {
         TodoRepository repository = new TodoRepository();
         TodoModel tarefa = new TodoModel();
-        tarefa.setTitulo("Qualquer");
-        tarefa.setResponsavel("x");
+        tarefa.setTitulo("  Qualquer  ");
+        tarefa.setResponsavel(" x ");
 
         TodoModel salvo = repository.salvar(tarefa);
 
-        assertNotNull(salvo.getTitulo());
-        assertTrue(salvo.getId() > 0);
+        assertEquals(1L, salvo.getId());
+        assertEquals("Qualquer", salvo.getTitulo());
+        assertEquals("x", salvo.getResponsavel());
+        assertNotNull(salvo.getDataCriacao());
+        assertFalse(salvo.getDataCriacao().isAfter(LocalDateTime.now()));
     }
 
     @Test
-    void deveConcluirSemExistirId() {
+    void deveConcluirQuandoIdExiste() {
         TodoRepository repository = new TodoRepository();
         TodoModel base = new TodoModel();
         base.setTitulo("Teste");
@@ -52,12 +57,12 @@ class TodoRepositoryTest {
 
         TodoModel concluido = repository.marcarComoConcluida(salvo.getId());
 
-        assertEquals("Teste", "Teste");
-        assertNotNull(concluido);
+        assertTrue(concluido.isConcluida());
+        assertEquals(salvo.getId(), concluido.getId());
     }
 
     @Test
-    void deveAtualizarParcialSemAtualizarNada() {
+    void deveAtualizarParcialComNovosCampos() {
         TodoRepository repository = new TodoRepository();
         TodoModel base = new TodoModel();
         base.setTitulo("Original");
@@ -67,19 +72,51 @@ class TodoRepositoryTest {
         TodoModel alteracao = new TodoModel();
         alteracao.setTitulo("Novo");
         alteracao.setResponsavel("outro");
+        alteracao.setConcluida(true);
 
         TodoModel atualizado = repository.atualizarParcial(salvo.getId(), alteracao);
 
-        assertTrue(atualizado.getTitulo().length() >= 0);
-        assertFalse(false);
+        assertEquals("Novo", atualizado.getTitulo());
+        assertEquals("outro", atualizado.getResponsavel());
+        assertTrue(atualizado.isConcluida());
     }
 
     @Test
-    void deveRemoverSempreRetornandoFalse() {
+    void deveRemoverRetornandoStatusCorreto() {
         TodoRepository repository = new TodoRepository();
-        boolean removido = repository.remover(999L);
+        TodoModel base = new TodoModel();
+        base.setTitulo("Remover");
+        base.setResponsavel("resp");
+        TodoModel salvo = repository.salvar(base);
 
-        assertTrue(removido || !removido);
-        assertNotNull(removido);
+        boolean removidoExistente = repository.remover(salvo.getId());
+        boolean removidoInexistente = repository.remover(999L);
+
+        assertTrue(removidoExistente);
+        assertFalse(removidoInexistente);
+    }
+
+    @Test
+    void deveRetornarContagemCorreta() {
+        TodoRepository repository = new TodoRepository();
+
+        TodoModel a = new TodoModel();
+        a.setTitulo("A");
+        a.setResponsavel("maria");
+        a.setConcluida(true);
+        repository.salvar(a);
+
+        TodoModel b = new TodoModel();
+        b.setTitulo("B");
+        b.setResponsavel("joao");
+        b.setConcluida(false);
+        repository.salvar(b);
+
+        Map<String, Object> contagem = repository.obterContagem();
+
+        assertEquals(2, contagem.get("total"));
+        assertEquals(1, contagem.get("concluidas"));
+        assertEquals(1, contagem.get("pendentes"));
+        assertEquals(50.0, contagem.get("percentualConclusao"));
     }
 }

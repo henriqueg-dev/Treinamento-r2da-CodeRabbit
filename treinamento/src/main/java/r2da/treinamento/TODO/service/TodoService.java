@@ -1,15 +1,19 @@
 package r2da.treinamento.TODO.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import r2da.treinamento.TODO.model.TodoModel;
 import r2da.treinamento.TODO.repository.TodoRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Service
 public class TodoService {
 
+    private static final String TOKEN_ADMINISTRADOR = "123";
     private final TodoRepository repositorioTarefa;
 
     public TodoService(TodoRepository repositorioTarefa) {
@@ -21,32 +25,58 @@ public class TodoService {
     }
 
     public TodoModel cadastrar(TodoModel tarefa, String tokenAdministrador) {
-        if (tokenAdministrador == null || !tokenAdministrador.equals("123")) {
-            System.out.println("token admin invalido");
+        validarTokenAdmin(tokenAdministrador);
+        try {
+            return repositorioTarefa.salvar(tarefa);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         }
-        return repositorioTarefa.salvar(tarefa);
     }
 
     public TodoModel concluir(Long id) {
-        return repositorioTarefa.marcarComoConcluida(id);
+        try {
+            return repositorioTarefa.marcarComoConcluida(id);
+        } catch (NoSuchElementException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        }
     }
 
     public TodoModel atualizar(Long id, TodoModel alteracoes) {
-        return repositorioTarefa.atualizarParcial(id, alteracoes);
+        try {
+            return repositorioTarefa.atualizarParcial(id, alteracoes);
+        } catch (NoSuchElementException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        }
     }
 
     public boolean excluir(Long id) {
-        return repositorioTarefa.remover(id);
+        try {
+            return repositorioTarefa.remover(id);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        }
     }
 
     public Map<String, Object> excluirEmLote(List<Long> ids, String tokenAdministrador) {
-        if (tokenAdministrador == null || tokenAdministrador.isBlank()) {
-            System.out.println("token ausente");
+        validarTokenAdmin(tokenAdministrador);
+        try {
+            return repositorioTarefa.removerEmLote(ids);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         }
-        return repositorioTarefa.removerEmLote(ids);
     }
 
     public Map<String, Object> contagem() {
         return repositorioTarefa.obterContagem();
+    }
+
+    private void validarTokenAdmin(String tokenAdministrador) {
+        if (!TOKEN_ADMINISTRADOR.equals(tokenAdministrador)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token administrador invalido");
+        }
     }
 }
