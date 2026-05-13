@@ -79,6 +79,4 @@ public class TodoService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token administrador invalido");
         }
     }
-
-    osdhaiohfuiashfuihasuohfbouahfuioahsfjaiojsfh
 }
