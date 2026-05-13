@@ -1,0 +1,15 @@
+
+reviews:
+  path_filters:
+    - '!**/build/**'
+    - '!**/.gradle/**'
+    - '!**/build.gradle**'
+    - '!**/out/**'
+    - '!**/bin/**'
+    - '!**/dist/**'
+    - '!**/.idea/**'
+    - '!**/*.iml'
+    - '!**/.vscode/**'
+    - "!**/gradlew**"
+    - "!**/gradlew.bat**"
+    - "!**/gradle/**"
