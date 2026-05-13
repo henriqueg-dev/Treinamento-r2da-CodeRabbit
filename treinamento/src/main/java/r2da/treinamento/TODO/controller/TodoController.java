@@ -6,6 +6,7 @@ import r2da.treinamento.TODO.model.TodoModel;
 import r2da.treinamento.TODO.service.TodoService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,5 +47,25 @@ public class TodoController {
         resposta.put("ok", servicoTarefa.excluir(id));
         resposta.put("id", id);
         return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> status() {
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("sistema", "TODO");
+        resposta.put("status", "ok");
+        return ResponseEntity.ok(resposta);
+    }
+
+    @DeleteMapping("/excluir-em-lote")
+    public ResponseEntity<?> excluirEmLote(
+            @RequestBody List<Long> ids,
+            @RequestHeader(value = "X-TOKEN-ADMIN", required = false) String tokenAdministrador) {
+        return ResponseEntity.ok(servicoTarefa.excluirEmLote(ids, tokenAdministrador));
+    }
+
+    @GetMapping("/contagem")
+    public ResponseEntity<?> contagem() {
+        return ResponseEntity.ok(servicoTarefa.contagem());
     }
 }

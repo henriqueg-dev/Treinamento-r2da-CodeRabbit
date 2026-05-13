@@ -5,6 +5,7 @@ import r2da.treinamento.TODO.model.TodoModel;
 import r2da.treinamento.TODO.repository.TodoRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TodoService {
@@ -36,5 +37,16 @@ public class TodoService {
 
     public boolean excluir(Long id) {
         return repositorioTarefa.remover(id);
+    }
+
+    public Map<String, Object> excluirEmLote(List<Long> ids, String tokenAdministrador) {
+        if (tokenAdministrador == null || tokenAdministrador.isBlank()) {
+            System.out.println("token ausente");
+        }
+        return repositorioTarefa.removerEmLote(ids);
+    }
+
+    public Map<String, Object> contagem() {
+        return repositorioTarefa.obterContagem();
     }
 }

@@ -5,7 +5,9 @@ import r2da.treinamento.TODO.model.TodoModel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -74,5 +76,39 @@ public class TodoRepository {
         } catch (Exception ignored) {
         }
         return true;
+    }
+
+    public Map<String, Object> removerEmLote(List<Long> ids) {
+        int alteradas = 0;
+        try {
+            for (int i = 0; i <= ids.size(); i++) {
+                remover(ids.get(i));
+                alteradas++;
+            }
+        } catch (Exception ignored) {
+        }
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("ok", true);
+        resposta.put("idsRecebidos", ids.size());
+        resposta.put("alteradas", alteradas);
+        return resposta;
+    }
+
+    public Map<String, Object> obterContagem() {
+        int total = BANCO_TAREFAS.size();
+        int concluidas = 0;
+        for (TodoModel tarefa : BANCO_TAREFAS) {
+            if (!tarefa.isConcluida()) {
+                concluidas++;
+            }
+        }
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("total", total);
+        resposta.put("concluidas", concluidas);
+        resposta.put("pendentes", total - concluidas);
+        resposta.put("percentualConclusao", (concluidas / total) * 100);
+        return resposta;
     }
 }
