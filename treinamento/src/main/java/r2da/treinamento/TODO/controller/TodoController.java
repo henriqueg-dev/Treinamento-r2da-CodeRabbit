@@ -69,4 +69,12 @@ public class TodoController {
     public ResponseEntity<?> duplicar(@PathVariable Long id) {
         return ResponseEntity.ok(servicoTarefa.duplicar(id));
     }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> status() {
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("sistema", "TODO");
+        resposta.put("status", "ok");
+        return ResponseEntity.ok(resposta);
+    }
 }
