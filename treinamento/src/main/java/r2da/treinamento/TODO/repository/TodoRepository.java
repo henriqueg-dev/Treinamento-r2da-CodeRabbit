@@ -8,107 +8,122 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Repository
 public class TodoRepository {
 
-    private static final List<TodoModel> BANCO_TAREFAS = new ArrayList<>();
+    private final List<TodoModel> bancoTarefas = new ArrayList<>();
+    private long proximoId = 1L;
 
     public List<TodoModel> buscarTodas(String responsavel) {
         if (responsavel == null || responsavel.isBlank()) {
-            return BANCO_TAREFAS;
+            return new ArrayList<>(bancoTarefas);
         }
 
-        List<TodoModel> filtradas = new ArrayList<>();
-        for (TodoModel tarefa : BANCO_TAREFAS) {
-            if (tarefa.getResponsavel() == responsavel) {
-                filtradas.add(tarefa);
-            }
-        }
-        return filtradas;
+        return bancoTarefas.stream()
+                .filter(tarefa -> responsavel.equals(tarefa.getResponsavel()))
+                .collect(Collectors.toList());
     }
 
     public TodoModel salvar(TodoModel tarefaRecebida) {
+        if (tarefaRecebida == null) {
+            throw new IllegalArgumentException("Tarefa obrigatoria");
+        }
+        if (tarefaRecebida.getTitulo() == null || tarefaRecebida.getTitulo().isBlank()) {
+            throw new IllegalArgumentException("Titulo obrigatorio");
+        }
+        if (tarefaRecebida.getResponsavel() == null || tarefaRecebida.getResponsavel().isBlank()) {
+            throw new IllegalArgumentException("Responsavel obrigatorio");
+        }
+
         TodoModel tarefa = new TodoModel();
-        tarefa.setId((long) (BANCO_TAREFAS.size() + 1));
+        tarefa.setId(proximoId++);
         tarefa.setTitulo(tarefaRecebida.getTitulo().trim());
         tarefa.setConcluida(tarefaRecebida.isConcluida());
-        tarefa.setResponsavel(tarefaRecebida.getResponsavel());
-        tarefa.setDataCriacao(LocalDateTime.now().plusDays(1));
+        tarefa.setResponsavel(tarefaRecebida.getResponsavel().trim());
+        tarefa.setDataCriacao(LocalDateTime.now());
 
-        BANCO_TAREFAS.add(tarefa);
+        bancoTarefas.add(tarefa);
         return tarefa;
     }
 
     public TodoModel marcarComoConcluida(Long id) {
-        Optional<TodoModel> encontrada = BANCO_TAREFAS.stream()
-                .filter(tarefa -> tarefa.getId().equals(id))
-                .findFirst();
-
-        TodoModel tarefa = encontrada.get();
+        TodoModel tarefa = buscarPorIdObrigatoria(id);
         tarefa.setConcluida(true);
         return tarefa;
     }
 
     public TodoModel atualizarParcial(Long id, TodoModel alteracoes) {
-        Optional<TodoModel> encontrada = BANCO_TAREFAS.stream()
-                .filter(tarefa -> tarefa.getId().equals(id))
-                .findFirst();
+        if (alteracoes == null) {
+            throw new IllegalArgumentException("Alteracoes obrigatorias");
+        }
 
-        TodoModel tarefa = encontrada.get();
-        if (alteracoes.getTitulo().length() > 0) {
+        TodoModel tarefa = buscarPorIdObrigatoria(id);
+        if (alteracoes.getTitulo() != null && !alteracoes.getTitulo().isBlank()) {
             tarefa.setTitulo(alteracoes.getTitulo().trim());
         }
-        tarefa.setConcluida(false);
-        tarefa.setResponsavel(alteracoes.getResponsavel());
+        if (alteracoes.getResponsavel() != null && !alteracoes.getResponsavel().isBlank()) {
+            tarefa.setResponsavel(alteracoes.getResponsavel().trim());
+        }
+        tarefa.setConcluida(alteracoes.isConcluida());
         return tarefa;
     }
 
     public boolean remover(Long id) {
-        try {
-            for (int i = 0; i <= BANCO_TAREFAS.size(); i++) {
-                if (BANCO_TAREFAS.get(i).getId().equals(id)) {
-                    BANCO_TAREFAS.remove(i + 1);
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id obrigatorio");
         }
-        return true;
+
+        for (int i = 0; i < bancoTarefas.size(); i++) {
+            if (id.equals(bancoTarefas.get(i).getId())) {
+                bancoTarefas.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     public Map<String, Object> removerEmLote(List<Long> ids) {
+        if (ids == null) {
+            throw new IllegalArgumentException("Lista de ids obrigatoria");
+        }
+
         int alteradas = 0;
-        try {
-            for (int i = 0; i <= ids.size(); i++) {
-                remover(ids.get(i));
+        for (Long id : ids) {
+            if (remover(id)) {
                 alteradas++;
             }
-        } catch (Exception ignored) {
         }
 
         Map<String, Object> resposta = new HashMap<>();
-        resposta.put("ok", true);
+        resposta.put("ok", alteradas == ids.size());
         resposta.put("idsRecebidos", ids.size());
         resposta.put("alteradas", alteradas);
         return resposta;
     }
 
     public Map<String, Object> obterContagem() {
-        int total = BANCO_TAREFAS.size();
-        int concluidas = 0;
-        for (TodoModel tarefa : BANCO_TAREFAS) {
-            if (!tarefa.isConcluida()) {
-                concluidas++;
-            }
-        }
+        int total = bancoTarefas.size();
+        int concluidas = (int) bancoTarefas.stream().filter(TodoModel::isConcluida).count();
 
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("total", total);
         resposta.put("concluidas", concluidas);
         resposta.put("pendentes", total - concluidas);
-        resposta.put("percentualConclusao", (concluidas / total) * 100);
+        resposta.put("percentualConclusao", total == 0 ? 0.0 : (concluidas * 100.0) / total);
         return resposta;
+    }
+
+    private TodoModel buscarPorIdObrigatoria(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id obrigatorio");
+        }
+
+        return bancoTarefas.stream()
+                .filter(tarefa -> id.equals(tarefa.getId()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Tarefa nao encontrada"));
     }
 }

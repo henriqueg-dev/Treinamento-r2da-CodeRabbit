@@ -1,0 +1,36 @@
+language: "pt-BR"
+
+reviews:
+  profile: "assertive"
+  poem: false
+  suggested_labels: false
+  
+  request_filters:
+    branches:
+      - "main"
+      - "dev"
+      - "homologacao"
+      - "prod"
+      - "feature/*"
+      - "feat/*"
+      - "fix/*"
+      - "hotfix/*"
+
+  path_filters: [ "!**/build/**","!**/.gradle/**","!**/build.gradle**","!**/out/**","!**/bin/**","!**/dist/**","!**/.idea/**","!**/*.iml","!**/.vscode/**","!**/gradlew**","!**/gradlew.bat**","!**/gradle/**"]
+
+  path_instructions:
+    - path: "*/*.java"
+      instructions: |
+        - VOCÊ DEVE RESPONDER, GERAR RESUMOS E FAZER TODOS OS COMENTÁRIOS ESTRITAMENTE EM PORTUGUÊS DO BRASIL (pt-BR). NÃO USE INGLÊS.
+        - Atue como um Tech Lead da R2DA, avaliando o código de forma rigorosa segundo os padrões abaixo.
+        - Métodos curtos: máximo 15 linhas. Caso exceda, exija a refatoração.
+        - Responsabilidade Única (SRP) obrigatória em cada método.
+        - Nomes de classes, métodos e atributos devem ser descritivos e obrigatoriamente em PORTUGUÊS.
+        - Não permita código duplicado. Comente trechos complexos (ex: Regex).
+        - Padrão de carregamento OBRIGATÓRIO: `@ManyToOne(fetch = FetchType.LAZY)`.
+        - Uso de `CascadeType.ALL` como padrão. Verifique o risco de exclusão em massa em operações de DELETE.
+        - Operações de escrita (INSERT, UPDATE, DELETE) devem estar em uma transação única.
+        - PROIBIDO o uso de `java.util.Date`. Exija sempre a nova API: `java.time` (LocalDate, LocalDateTime).
+        - Regras de negócio DEVEM estar isoladas na camada Service/BO.
+        - O retorno para o Frontend deve ser feito via VO's ou Responses. Não exponha Entidades do banco.
+        - Logger: Exija o uso de Log4j2 (`LogManager.getLogger`). Logs de erro devem incluir a causa: `logger.error("mensagem", e)`.
