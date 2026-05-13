@@ -34,3 +34,6 @@ reviews:
         - Regras de negócio DEVEM estar isoladas na camada Service/BO.
         - O retorno para o Frontend deve ser feito via VO's ou Responses. Não exponha Entidades do banco.
         - Logger: Exija o uso de Log4j2 (`LogManager.getLogger`). Logs de erro devem incluir a causa: `logger.error("mensagem", e)`.
+
+   
+# linked_repositories: api-entidade / api-vo 
