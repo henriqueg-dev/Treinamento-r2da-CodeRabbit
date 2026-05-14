@@ -68,4 +68,14 @@ public class TodoController {
     public ResponseEntity<?> contagem() {
         return ResponseEntity.ok(servicoTarefa.contagem());
     }
+
+    @GetMapping("/pendentes")
+    public ResponseEntity<?> pendentes() {
+        return ResponseEntity.ok(servicoTarefa.listarPendentes());
+    }
+
+    @GetMapping("/contagem-por-responsavel")
+    public ResponseEntity<?> contagemPorResponsavel() {
+        return ResponseEntity.ok(servicoTarefa.contagemPorResponsavel());
+    }
 }

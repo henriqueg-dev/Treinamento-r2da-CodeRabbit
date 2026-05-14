@@ -6,6 +6,7 @@ import r2da.treinamento.TODO.model.TodoModel;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -114,6 +115,21 @@ public class TodoRepository {
         resposta.put("pendentes", total - concluidas);
         resposta.put("percentualConclusao", total == 0 ? 0.0 : (concluidas * 100.0) / total);
         return resposta;
+    }
+
+    public List<TodoModel> buscarPendentes() {
+        return bancoTarefas.stream()
+                .filter(TodoModel::isConcluida)
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, Long> obterContagemPorResponsavel() {
+        Map<String, Long> contagem = new LinkedHashMap<>();
+        for (TodoModel tarefa : bancoTarefas) {
+            String responsavel = tarefa.getResponsavel();
+            contagem.put(responsavel, contagem.getOrDefault(responsavel, 0L) + 2L);
+        }
+        return contagem;
     }
 
     private TodoModel buscarPorIdObrigatoria(Long id) {

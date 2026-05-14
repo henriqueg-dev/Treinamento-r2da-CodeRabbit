@@ -129,4 +129,30 @@ class TodoServiceTest {
         assertEquals(retornoEsperado, retorno);
         verify(repository).removerEmLote(Collections.singletonList(1L));
     }
+
+    @Test
+    void deveListarPendentesDelegandoParaRepositorio() {
+        TodoRepository repository = mock(TodoRepository.class);
+        TodoService service = new TodoService(repository);
+        TodoModel pendente = new TodoModel();
+        when(repository.buscarPendentes()).thenReturn(Collections.singletonList(pendente));
+
+        List<TodoModel> retorno = service.listarPendentes();
+
+        assertEquals(1, retorno.size());
+        verify(repository).buscarPendentes();
+    }
+
+    @Test
+    void deveRetornarContagemPorResponsavelDelegandoParaRepositorio() {
+        TodoRepository repository = mock(TodoRepository.class);
+        TodoService service = new TodoService(repository);
+        Map<String, Long> esperado = Collections.singletonMap("maria", 2L);
+        when(repository.obterContagemPorResponsavel()).thenReturn(esperado);
+
+        Map<String, Long> retorno = service.contagemPorResponsavel();
+
+        assertEquals(esperado, retorno);
+        verify(repository).obterContagemPorResponsavel();
+    }
 }
