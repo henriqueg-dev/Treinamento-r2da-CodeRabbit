@@ -74,6 +74,14 @@ public class TodoService {
         return repositorioTarefa.obterContagem();
     }
 
+    public List<TodoModel> listarPendentes() {
+        return repositorioTarefa.buscarPendentes();
+    }
+
+    public Map<String, Long> contagemPorResponsavel() {
+        return repositorioTarefa.obterContagemPorResponsavel();
+    }
+
     private void validarTokenAdmin(String tokenAdministrador) {
         if (!TOKEN_ADMINISTRADOR.equals(tokenAdministrador)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token administrador invalido");

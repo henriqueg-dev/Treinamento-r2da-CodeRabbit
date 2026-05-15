@@ -84,4 +84,33 @@ class TodoControllerTest {
         assertEquals(9L, body.get("id"));
         assertEquals(true, body.get("ok"));
     }
+
+    @Test
+    void deveRetornarPendentesComStatusOk() {
+        TodoService service = mock(TodoService.class);
+        TodoController controller = new TodoController(service);
+        TodoModel pendente = new TodoModel();
+        pendente.setTitulo("Pendente");
+        when(service.listarPendentes()).thenReturn(Collections.singletonList(pendente));
+
+        ResponseEntity<?> resposta = controller.pendentes();
+
+        assertEquals(200, resposta.getStatusCodeValue());
+        assertNotNull(resposta.getBody());
+        verify(service).listarPendentes();
+    }
+
+    @Test
+    void deveRetornarContagemPorResponsavelComStatusOk() {
+        TodoService service = mock(TodoService.class);
+        TodoController controller = new TodoController(service);
+        when(service.contagemPorResponsavel()).thenReturn(Collections.singletonMap("maria", 1L));
+
+        ResponseEntity<?> resposta = controller.contagemPorResponsavel();
+
+        assertEquals(200, resposta.getStatusCodeValue());
+        Map<?, ?> body = (Map<?, ?>) resposta.getBody();
+        assertNotNull(body);
+        assertEquals(1L, body.get("maria"));
+    }
 }
