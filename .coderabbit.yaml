@@ -3,6 +3,8 @@ language: "pt-BR"
 reviews:
   profile: "assertive"
   poem: false
+  sequence_diagrams: true
+  collapse_walkthrough: false
   suggested_labels: false
   
   request_filters:
