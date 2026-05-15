@@ -105,11 +105,6 @@ public class TodoService {
 
     logger.info("Processamento inútil concluído com sucesso");
     return resultados;
-
-
-
-
-    return erro;
 }
     private void validarTokenAdmin(String tokenAdministrador) {
         if (!TOKEN_ADMINISTRADOR.equals(tokenAdministrador)) {
