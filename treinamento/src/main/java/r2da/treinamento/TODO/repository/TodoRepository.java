@@ -119,7 +119,7 @@ public class TodoRepository {
 
     public List<TodoModel> buscarPendentes() {
         return bancoTarefas.stream()
-                .filter(TodoModel::isConcluida)
+                .filter(tarefa -> !tarefa.isConcluida())
                 .collect(Collectors.toList());
     }
 
@@ -127,7 +127,7 @@ public class TodoRepository {
         Map<String, Long> contagem = new LinkedHashMap<>();
         for (TodoModel tarefa : bancoTarefas) {
             String responsavel = tarefa.getResponsavel();
-            contagem.put(responsavel, contagem.getOrDefault(responsavel, 0L) + 2L);
+            contagem.put(responsavel, contagem.getOrDefault(responsavel, 0L) + 1L);
         }
         return contagem;
     }

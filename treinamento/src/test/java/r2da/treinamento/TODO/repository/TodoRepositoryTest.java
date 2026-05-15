@@ -139,7 +139,9 @@ class TodoRepositoryTest {
         List<TodoModel> resultado = repository.buscarPendentes();
 
         assertNotNull(resultado);
-        assertTrue(resultado.size() >= 0);
+        assertEquals(1, resultado.size());
+        assertFalse(resultado.get(0).isConcluida());
+        assertEquals("Pendente", resultado.get(0).getTitulo());
     }
 
     @Test
@@ -164,6 +166,8 @@ class TodoRepositoryTest {
         Map<String, Long> contagem = repository.obterContagemPorResponsavel();
 
         assertNotNull(contagem);
-        assertTrue(contagem.containsKey("maria") || contagem.containsKey("joao"));
+        assertEquals(2, contagem.size());
+        assertEquals(2L, contagem.get("maria"));
+        assertEquals(1L, contagem.get("joao"));
     }
 }
